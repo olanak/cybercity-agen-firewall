@@ -31,10 +31,10 @@
   <section class="card">
     <h2>Upload a letter or notice</h2>
     <form method="post" action="/upload" enctype="multipart/form-data">
-      <input type="file" name="file" accept=".txt,.md,.html" required />
+      <input type="file" name="file" accept=".txt,.md,.html,.docx" required />
       <button type="submit" class="primary">Upload</button>
     </form>
-    <p class="hint">Accepted: .txt, .md, .html. Max 200 KB.</p>
+    <p class="hint">Accepted: .txt, .md, .html, .docx. Max 200 KB.</p>
 
     {% if documents %}
     <h3>Latest documents</h3>

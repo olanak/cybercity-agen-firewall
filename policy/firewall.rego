@@ -66,9 +66,12 @@ deny contains msg if {
 	input.tool == "render_link"
 	url := input.args.url.value
 	some personal in input.personal_values
-	personal != ""
-	contains(url, personal)
-	msg := sprintf("This link would send your personal data (%s) outside the portal.", [personal])
+	personal.value != ""
+	contains(url, personal.value)
+	msg := sprintf(
+		"This link contains a resident's %s. It won't be opened, because that would send personal data outside the portal.",
+		[personal.kind],
+	)
 }
 
 deny contains msg if {

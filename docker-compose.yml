@@ -13,5 +13,17 @@ services:
     volumes:
       - firewall-data:/app/data
 
+  # Public HTTPS URL via Cloudflare quick tunnel. `docker compose logs tunnel`
+  # prints the assigned https://<random>.trycloudflare.com URL. No account,
+  # no config; URL changes on every restart. Comment this out to keep the app
+  # localhost-only.
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: cybercity-tunnel
+    depends_on:
+      - firewall
+    command: tunnel --no-autoupdate --url http://firewall:8000
+    restart: unless-stopped
+
 volumes:
   firewall-data:

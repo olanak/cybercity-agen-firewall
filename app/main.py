@@ -190,16 +190,20 @@ def upload(request: Request, file: UploadFile = File(...)):
     if s["frozen"]:
         raise HTTPException(status_code=403, detail="session frozen")
     name = (file.filename or "upload").lower()
-    if not (name.endswith(".txt") or name.endswith(".md") or name.endswith(".html")):
-        raise HTTPException(status_code=400, detail="only .txt, .md, .html accepted")
+    accepted = (".txt", ".md", ".html", ".docx")
+    if not name.endswith(accepted):
+        raise HTTPException(status_code=400, detail="only .txt, .md, .html, .docx accepted")
     data = file.file.read(200 * 1024 + 1)
     if len(data) > 200 * 1024:
         raise HTTPException(status_code=400, detail="file exceeds 200 KB")
-    try:
-        text = data.decode("utf-8")
-    except UnicodeDecodeError:
-        text = data.decode("latin-1", errors="replace")
-    body, hidden = docparse.extract(text, name)
+    if name.endswith(".docx"):
+        payload = data  # binary; docparse handles the zip
+    else:
+        try:
+            payload = data.decode("utf-8")
+        except UnicodeDecodeError:
+            payload = data.decode("latin-1", errors="replace")
+    body, hidden = docparse.extract(payload, name)
     import json
     with get_conn() as conn:
         conn.execute(
