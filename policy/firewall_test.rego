@@ -13,7 +13,11 @@ base(overrides) := merged if {
 		"resident_confirmed": false,
 		"args": {},
 		"recent_calls": [],
-		"personal_values": ["TR-4481927", "alice@cybercity.example", "+10-555-0101"],
+		"personal_values": [
+			{"kind": "national ID", "value": "TR-4481927"},
+			{"kind": "email", "value": "alice@cybercity.example"},
+			{"kind": "phone number", "value": "+10-555-0101"},
+		],
 	}
 	merged := object.union(base, overrides)
 }
@@ -114,7 +118,7 @@ test_deny_render_link_leaks_personal if {
 	})
 	r.decision == "deny"
 	some m in r.reasons
-	contains(m, "personal data")
+	contains(m, "national ID")
 }
 
 test_allow_render_link_clean if {

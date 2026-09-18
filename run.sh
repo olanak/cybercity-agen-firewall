@@ -44,4 +44,5 @@ start_opa || echo "!! continuing without OPA server; gateway will use opa eval f
 seed_if_empty
 
 echo ">> starting uvicorn on 0.0.0.0:8000"
-exec uvicorn app.main:app --host 0.0.0.0 --port 8000
+exec uvicorn app.main:app --host 0.0.0.0 --port 8000 \
+    --proxy-headers --forwarded-allow-ips '*'

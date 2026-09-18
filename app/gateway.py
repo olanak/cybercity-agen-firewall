@@ -49,15 +49,24 @@ def _recent_calls(session_id: str, limit: int = 20) -> list[dict[str, str]]:
     return [{"tool": r["tool"]} for r in rows]
 
 
-def _personal_values(resident_id: int) -> list[str]:
+def _personal_values(resident_id: int) -> list[dict[str, str]]:
+    """Every resident's PII tagged by kind. The kind is passed on to the
+    firewall log; the raw value stays inside the policy input only, so a log
+    reader sees 'a national ID' rather than the id itself."""
     with get_conn() as conn:
-        row = conn.execute(
-            "SELECT email, phone, national_id FROM residents WHERE id = ?",
-            (resident_id,),
-        ).fetchone()
-    if not row:
-        return []
-    return [row["email"], row["phone"], row["national_id"]]
+        rows = conn.execute(
+            "SELECT email, phone, national_id FROM residents"
+        ).fetchall()
+    tagged: list[dict[str, str]] = []
+    for row in rows:
+        for kind, value in (
+            ("email", row["email"]),
+            ("phone number", row["phone"]),
+            ("national ID", row["national_id"]),
+        ):
+            if value:
+                tagged.append({"kind": kind, "value": value})
+    return tagged
 
 
 def build_input(session: dict, call: dict, *, resident_confirmed: bool = False) -> dict:
