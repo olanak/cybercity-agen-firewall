@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Portal — {{ session.username }}{% endblock %}
+{% block content %}
+<div class="grid">
+  <section class="card">
+    <h2>Your profile</h2>
+    <p><strong>Email:</strong> {{ session.email }}</p>
+    <p><strong>Phone:</strong> {{ session.phone }}</p>
+    <p class="hint">To change contact details, use <a href="/account">Account settings</a>.</p>
+  </section>
+
+  <section class="card">
+    <h2>Your appointments</h2>
+    {% if appointments %}
+      <table>
+        <thead><tr><th>Ref</th><th>Service</th><th>Slot</th><th>Status</th></tr></thead>
+        <tbody>
+        {% for a in appointments %}
+          <tr>
+            <td><code>{{ a.ref }}</code></td>
+            <td>{{ a.service }}</td>
+            <td>{{ a.slot_iso }}</td>
+            <td>{{ a.status }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    {% else %}<p>No appointments booked.</p>{% endif %}
+  </section>
+
+  <section class="card">
+    <h2>Upload a letter or notice</h2>
+    <form method="post" action="/upload" enctype="multipart/form-data">
+      <input type="file" name="file" accept=".txt,.md,.html" required />
+      <button type="submit" class="primary">Upload</button>
+    </form>
+    <p class="hint">Accepted: .txt, .md, .html. Max 200 KB.</p>
+
+    {% if documents %}
+    <h3>Latest documents</h3>
+    {% for d in documents %}
+      <details {% if loop.first %}open{% endif %}>
+        <summary>{{ d.filename }} · {{ d.created_at }}</summary>
+        <pre class="doc">{{ d.body_text }}</pre>
+        {% set hidden = d.hidden_segments | tojson | from_json if false else d.hidden_segments %}
+        {% if d.hidden_segments and d.hidden_segments != '[]' %}
+          <p class="warn">Hidden content detected in this document:</p>
+          <pre class="doc hidden">{{ d.hidden_segments }}</pre>
+        {% endif %}
+      </details>
+    {% endfor %}
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <h2>Assistant</h2>
+    <p class="hint">Simulated deterministic assistant. No LLM. Try "reschedule my cardiology appointment" or upload a letter and say "act on my letter".</p>
+    <div class="chat">
+      {% for m in messages %}
+        <div class="msg {{ m.role }}">
+          <span class="who">{{ m.role }}</span>
+          <pre class="body">{{ m.text }}</pre>
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if pending %}
+      <div class="pending-panel">
+        <h3>Actions waiting for your approval</h3>
+        <p class="hint">These came from the assistant, not from you. Approve or dismiss each one.</p>
+        {% for p in pending %}
+          <div class="pending-row">
+            <div class="desc">{{ p.description }}</div>
+            <div class="actions">
+              <form method="post" action="/confirm/{{ p.token }}" class="inline">
+                <button type="submit" class="primary small">Approve</button>
+              </form>
+              <form method="post" action="/decline/{{ p.token }}" class="inline">
+                <button type="submit" class="small">Dismiss</button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="post" action="/chat">
+      <textarea name="message" rows="3" placeholder="Type a request..."></textarea>
+      <button type="submit" class="primary">Send</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+services:
+  firewall:
+    build: .
+    image: cybercity-firewall:latest
+    container_name: cybercity-firewall
+    ports:
+      - "8000:8000"
+      - "8181:8181"
+    environment:
+      OPA_URL: http://127.0.0.1:8181
+      FIREWALL_MODE: full
+      FIREWALL_DB: /app/data/cybercity.db
+    volumes:
+      - firewall-data:/app/data
+
+volumes:
+  firewall-data:

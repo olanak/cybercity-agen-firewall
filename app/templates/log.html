@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Firewall log{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Firewall decisions</h1>
+  <p class="hint">Newest first. In production, this view would be role-restricted to city hall policy officers.</p>
+  {% if not decisions %}
+    <p><em>No decisions recorded yet.</em></p>
+  {% else %}
+    <table class="log">
+      <thead>
+        <tr><th>When</th><th>Who</th><th>Tool</th><th>Args (origin)</th><th>Mode</th><th>Decision</th><th>Reasons</th></tr>
+      </thead>
+      <tbody>
+      {% for d in decisions %}
+        <tr class="row-{{ d.decision }}">
+          <td class="mono">{{ d.created_at[:19].replace('T',' ') }}</td>
+          <td>{{ d.username }}</td>
+          <td class="mono">{{ d.tool }}</td>
+          <td>
+            {% for k, v in d.args.items() %}
+              <div>
+                <span class="k">{{ k }}</span>
+                <span class="v">{{ v.value if v.value is defined else v }}</span>
+                {% set origin = d.origins.get(k) %}
+                {% if origin %}<span class="chip chip-{{ origin }}">{{ origin }}</span>{% endif %}
+              </div>
+            {% else %}
+              <em>—</em>
+            {% endfor %}
+          </td>
+          <td>{{ d.mode }}</td>
+          <td><span class="pill pill-{{ d.decision }}">{{ d.decision | upper }}</span></td>
+          <td>
+            {% for r in d.reasons %}<div class="reason">{{ r }}</div>{% endfor %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+</section>
+{% endblock %}

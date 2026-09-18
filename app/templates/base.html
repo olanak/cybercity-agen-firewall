@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}CyberCity Portal{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body class="mode-{{ mode }}">
+  <header class="topbar">
+    <div class="brand">
+      <a href="/portal">CyberCity Portal</a>
+      <span class="tag">Simulated demo · deterministic, no LLM</span>
+    </div>
+    <nav>
+      {% if session %}
+        <a href="/portal">Portal</a>
+        <a href="/account">Account</a>
+        <a href="/log">Firewall log</a>
+        <form action="/logout" method="post" class="inline">
+          <button class="linklike" type="submit">Log out</button>
+        </form>
+      {% else %}
+        <a href="/login">Log in</a>
+      {% endif %}
+    </nav>
+  </header>
+
+  {% if session %}
+  <div class="session-banner {% if session.frozen %}frozen{% endif %}">
+    Signed in as <strong>{{ session.username }}</strong> · session
+    <code>{{ session.id[:8] }}</code> · expires {{ session.expires_at.strftime('%Y-%m-%d %H:%M UTC') }} ·
+    firewall mode <strong>{{ mode }}</strong>
+    {% if session.frozen %} · <span class="pill pill-danger">FROZEN</span>{% endif %}
+    <span class="mode-switch">
+      switch mode:
+      <a href="?mode=none">none</a>
+      <a href="?mode=full">full</a>
+    </span>
+  </div>
+  {% endif %}
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>
+    <form action="/reset-demo" method="post" class="inline">
+      <button type="submit" class="danger">Reset demo</button>
+    </form>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Confirm action{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>Confirm this action</h1>
+  <p>The assistant would like to run <code>{{ call.tool }}</code>.</p>
+  <ul>
+    {% for k, v in call.args.items() %}
+      <li>
+        <strong>{{ k }}</strong>: {{ v.value }}
+        <span class="chip chip-{{ v.origin }}">{{ v.origin }}</span>
+      </li>
+    {% endfor %}
+  </ul>
+  <p class="warn">This message is written by the portal, not the assistant.</p>
+  <form method="post" action="/confirm/{{ token }}">
+    <button class="primary" type="submit">Yes, run it</button>
+    <a href="/portal" class="linklike">Cancel</a>
+  </form>
+</section>
+{% endblock %}

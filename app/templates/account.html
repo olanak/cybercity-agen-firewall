@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Account — {{ session.username }}{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>Account settings</h1>
+  {% if ok == 'email' %}<p class="ok">Email updated.</p>{% endif %}
+  <p>These changes are made directly by you and don't touch the assistant.</p>
+  <form method="post" action="/account/email">
+    <label>New email
+      <input name="new_email" type="email" required value="{{ session.email }}" />
+    </label>
+    <button type="submit" class="primary">Change email</button>
+  </form>
+  <p class="hint">Password reset flows also start from the login page, never from a document.</p>
+</section>
+{% endblock %}
